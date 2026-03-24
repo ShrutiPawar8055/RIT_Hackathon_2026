@@ -24,7 +24,9 @@ dist-ssr
 *.sw?
 
 # ML training data and models
-cough_model/spectrograms/
+cough_model/spectrograms/LIVEKIT_API_KEY=your-actual-key
+LIVEKIT_API_SECRET=your-actual-secret  
+LIVEKIT_URL=wss://your-livekit-server.com
 cough_model/Healthy/
 cough_model/Sick/
 cough_model/test_data/

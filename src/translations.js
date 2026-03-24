@@ -4,6 +4,7 @@ export const translations = {
     "nav.triage": { en: "Triage", hi: "आकलन", mr: "तपासणी" },
     "nav.patients": { en: "Patients", hi: "मरीज", mr: "रुग्ण" },
     "nav.settings": { en: "Settings", hi: "सेटिंग्स", mr: "सेटिंग्ज" },
+    "nav.voice": { en: "Voice", hi: "आवाज", mr: "आवाज" },
     
     // Settings
     "settings.language": { en: "Language", hi: "भाषा", mr: "भाषा" },

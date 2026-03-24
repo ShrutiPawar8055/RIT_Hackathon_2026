@@ -1,12 +1,12 @@
+import { useLanguage } from '../../context/LanguageContext'
+
 const NAV_ITEMS = [
     { id: 'home', icon: '🏠', label: 'Home' },
     { id: 'patients', icon: '👥', label: 'Patients' },
     { id: 'triage', icon: '🟢', label: 'Triage', isCenter: true },
-    { id: 'analytics', icon: '📊', label: 'Reports' },
+    { id: 'voice', icon: '🗣️', label: 'Voice' },
     { id: 'settings', icon: '⚙️', label: 'Settings' },
 ]
-
-import { useLanguage } from '../../context/LanguageContext'
 
 const BottomNav = ({ activePage, onNavigate }) => {
     const { t } = useLanguage()
