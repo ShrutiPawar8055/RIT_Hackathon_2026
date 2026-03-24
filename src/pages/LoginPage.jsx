@@ -10,17 +10,16 @@ const LoginPage = ({ onLogin }) => {
 
     const handleLogin = (e) => {
         e.preventDefault()
-        if (username === 'demo' && password === 'demo') {
+        if (username.trim() !== '' && password.trim() !== '') {
             onLogin()
         } else {
-            setError('Invalid credentials. Use demo/demo.')
+            setError('Please enter your credentials.')
         }
     }
 
-    const handleDemoLogin = () => {
-        setUsername('demo')
-        setPassword('demo')
-        onLogin()
+    const handleDemoAutofill = () => {
+        setUsername('demo_chw_001')
+        setPassword('password123')
     }
 
     return (
@@ -85,7 +84,7 @@ const LoginPage = ({ onLogin }) => {
                     
                     <button
                         type="button"
-                        onClick={handleDemoLogin}
+                        onClick={handleDemoAutofill}
                         style={{
                             padding: '16px',
                             borderRadius: '16px',
@@ -97,7 +96,7 @@ const LoginPage = ({ onLogin }) => {
                             fontSize: '15px'
                         }}
                     >
-                        Demo Login
+                        Auto-fill Demo Login
                     </button>
                 </div>
             </form>

@@ -13,7 +13,12 @@ const STEPS = [
 const TriagePage = () => {
     const [step, setStep] = useState(1)
     const [recording, setRecording] = useState(false)
+    const canvasRef = useRef(null)
+    const audioCtxRef = useRef(null)
+    const analyserRef = useRef(null)
+    const animationRef = useRef(null)
     const [audioProgress, setAudioProgress] = useState(0)
+    const [audioFile, setAudioFile] = useState(null)
     const [triageData, setTriageData] = useState({
         m1_consciousness: false, m1_intake: false,
         m2_cough: 0, m2_breathing: 0, m2_fever: 0, m2_blood: false, m2_silicosis: false,
@@ -41,6 +46,10 @@ const TriagePage = () => {
             if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
                 mediaRecorderRef.current.stop()
             }
+            if (animationRef.current) cancelAnimationFrame(animationRef.current)
+            if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+                audioCtxRef.current.close().catch(console.error)
+            }
             setRecording(false)
             return
         }
@@ -51,6 +60,45 @@ const TriagePage = () => {
             mediaRecorderRef.current = mediaRecorder
             audioChunksRef.current = []
 
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+            const analyser = audioCtx.createAnalyser()
+            analyser.fftSize = 256
+            const source = audioCtx.createMediaStreamSource(stream)
+            source.connect(analyser)
+            audioCtxRef.current = audioCtx
+            analyserRef.current = analyser
+
+            const drawSpectrogram = () => {
+                if (!canvasRef.current || !analyserRef.current) return
+                
+                const canvas = canvasRef.current
+                const ctx = canvas.getContext('2d')
+                const bufferLength = analyserRef.current.frequencyBinCount
+                const dataArray = new Uint8Array(bufferLength)
+                
+                analyserRef.current.getByteFrequencyData(dataArray)
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height)
+                
+                const barWidth = (canvas.width / bufferLength) * 2.5
+                let x = 0
+                
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = (dataArray[i] / 255) * canvas.height
+                    
+                    const r = barHeight + (25 * (i/bufferLength))
+                    const g = 250 * (i/bufferLength)
+                    const b = 255
+                    
+                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.8)`
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight)
+                    
+                    x += barWidth + 1
+                }
+                
+                animationRef.current = requestAnimationFrame(drawSpectrogram)
+            }
+
             mediaRecorder.ondataavailable = (e) => {
                 if (e.data.size > 0) audioChunksRef.current.push(e.data)
             }
@@ -58,15 +106,25 @@ const TriagePage = () => {
             mediaRecorder.onstop = () => {
                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
                 const audioUrl = URL.createObjectURL(audioBlob)
+                setAudioFile(audioBlob)
                 setAudioPreview(audioUrl)
                 setAudioUploaded(true)
                 stream.getTracks().forEach(track => track.stop())
+                
+                if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+                    audioCtxRef.current.close().catch(console.error)
+                }
+                if (animationRef.current) {
+                    cancelAnimationFrame(animationRef.current)
+                }
             }
 
             mediaRecorder.start()
             setRecording(true)
             setAudioProgress(0)
             setAudioPreview(null)
+            
+            drawSpectrogram()
 
             let p = 0
             timerRef.current = setInterval(() => {
@@ -91,26 +149,59 @@ const TriagePage = () => {
 
     const runAnalysis = () => {
         setStep(2)
-        setTimeout(() => {
-            let risk = Math.random() > 0.4 ? 'green' : 'red'
-            let conf = (75 + Math.random() * 22).toFixed(1)
+        
+        const formData = new FormData();
+        if (audioFile) {
+            // Append with a default filename in case it's a blob
+            formData.append('audio', audioFile, audioFile.name || 'recording.webm');
+        } else {
+            alert('No audio file found');
+            setStep(1);
+            return;
+        }
+
+        fetch('http://127.0.0.1:5000/predict', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert('Analysis Error: ' + data.error);
+                setStep(1);
+                return;
+            }
+            
+            let risk = data.risk;
+            let conf = parseFloat(data.confidence).toFixed(1);
 
             // RED ALERT override logic
             if (triageData.m1_consciousness || triageData.m1_intake) {
-                risk = 'red'
-                conf = '99.9'
+                risk = 'red';
+                conf = '99.9';
             }
 
-            setRiskLevel(risk)
-            setConfidence(conf)
-            setStep(3)
-        }, 2000)
+            setRiskLevel(risk);
+            setConfidence(conf);
+            setStep(3);
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Failed to connect to AI server. Make sure the local python backend is running on port 5000.');
+            setStep(1);
+        });
     }
 
     const reset = () => {
+        if (animationRef.current) cancelAnimationFrame(animationRef.current)
+        if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+            audioCtxRef.current.close().catch(console.error)
+        }
+        
         setStep(1)
         setRecording(false)
         setAudioProgress(0)
+        setAudioFile(null)
         setRiskLevel(null)
         setConfidence(null)
         setAudioUploaded(false)
@@ -132,6 +223,7 @@ const TriagePage = () => {
         const fileUrl = URL.createObjectURL(file)
 
         if (type === 'audio') {
+            setAudioFile(file)
             setAudioPreview(fileUrl)
             setAudioUploaded(true)
             setAudioProgress(100)
@@ -283,6 +375,22 @@ const TriagePage = () => {
                             <div style={{ width: '100%' }}>
                                 <NeumorphicProgressBar value={audioProgress} color="var(--red-alert)" />
                             </div>
+                            
+                            <div style={{ width: '100%', height: recording ? '60px' : '0px', transition: 'height 0.3s ease', overflow: 'hidden' }}>
+                                <canvas 
+                                    ref={canvasRef} 
+                                    width="300" 
+                                    height="60" 
+                                    style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        borderRadius: '8px', 
+                                        background: 'var(--bg)',
+                                        boxShadow: 'inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light)'
+                                    }} 
+                                />
+                            </div>
+
                             {audioPreview && (
                                 <audio src={audioPreview} controls style={{ width: '100%', marginTop: '8px', height: '36px', borderRadius: '18px' }} />
                             )}
@@ -556,22 +664,7 @@ const TriagePage = () => {
                             <NeumorphicProgressBar value={parseFloat(confidence)} color={riskLevel === 'red' ? 'var(--red-alert)' : 'var(--green-alert)'} height={14} />
                         </div>
 
-                        {/* Sub scores */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
-                            {[
-                                { label: 'Cough Pattern Score', value: (60 + Math.random() * 35).toFixed(0), color: 'var(--text-secondary)' },
-                                { label: 'Eye Pallor Index', value: (40 + Math.random() * 50).toFixed(0), color: 'var(--text-secondary)' },
-                                { label: 'Symptom Correlation', value: (70 + Math.random() * 25).toFixed(0), color: 'var(--text-secondary)' },
-                            ].map((score) => (
-                                <div key={score.label}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{score.label}</span>
-                                        <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-primary)' }}>{score.value}%</span>
-                                    </div>
-                                    <NeumorphicProgressBar value={parseFloat(score.value)} color="var(--text-secondary)" height={8} />
-                                </div>
-                            ))}
-                        </div>
+
                     </NeumorphicCard>
 
                     <div style={{ display: 'flex', gap: '12px' }}>

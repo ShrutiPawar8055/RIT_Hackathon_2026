@@ -1,16 +1,7 @@
 import { useState } from 'react'
 import NeumorphicCard from '../components/ui/NeumorphicCard'
 
-const PATIENTS = [
-    { name: 'Sita Devi', age: 34, village: 'Rampur', lastScreened: '19 Mar 2026', status: 'green' },
-    { name: 'Ramu Yadav', age: 52, village: 'Balpur', lastScreened: '19 Mar 2026', status: 'red' },
-    { name: 'Anjali Kumari', age: 28, village: 'Sundarpur', lastScreened: '18 Mar 2026', status: 'green' },
-    { name: 'Manoj Singh', age: 61, village: 'Kharagpur', lastScreened: '17 Mar 2026', status: 'red' },
-    { name: 'Priya Sharma', age: 22, village: 'Deoghar', lastScreened: '16 Mar 2026', status: 'green' },
-    { name: 'Suresh Kumar', age: 45, village: 'Jamtara', lastScreened: '15 Mar 2026', status: 'green' },
-    { name: 'Meena Devi', age: 39, village: 'Giridih', lastScreened: '14 Mar 2026', status: 'red' },
-    { name: 'Ajay Mishra', age: 57, village: 'Dhanbad', lastScreened: '13 Mar 2026', status: 'green' },
-]
+const PATIENTS = []
 
 const PatientsPage = () => {
     const [query, setQuery] = useState('')

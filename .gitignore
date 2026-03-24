@@ -22,3 +22,23 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# ML training data and models
+cough_model/spectrograms/
+cough_model/Healthy/
+cough_model/Sick/
+cough_model/test_data/
+cough_model/**/*.webm
+cough_model/**/*.wav
+cough_model/**/*.ogg
+cough_model/**/*.png
+cough_model/**/*.h5
+cough_model/**/*.pyc
+**/__pycache__/
+*.pyc
+cough_model/model_performance.png
+cough_model/test_results.txt
+# Recursive ignores for nested data
+**/cough_model/Sick/**
+**/cough_model/Healthy/**
+**/cough_model/spectrograms/**

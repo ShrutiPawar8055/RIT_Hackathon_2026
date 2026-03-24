@@ -1,23 +1,19 @@
+import { useState } from 'react'
 import NeumorphicCard from '../components/ui/NeumorphicCard'
 import NeumorphicButton from '../components/ui/NeumorphicButton'
 
-const RECENT_PATIENTS = [
-    { name: 'Sita Devi', time: '2h ago', status: 'green', condition: 'TB Screening' },
-    { name: 'Ramu Yadav', time: '4h ago', status: 'red', condition: 'Pneumonia Risk' },
-    { name: 'Anjali Kumari', time: '6h ago', status: 'green', condition: 'Anemia Check' },
-]
+const RECENT_PATIENTS = []
 
 const QUICK_ACTIONS = [
-    { icon: '🫁', label: 'Cough Scan' },
-    { icon: '👁️', label: 'Anemia Check' },
-    { icon: '📝', label: 'Manual Triage' },
     { icon: '🔄', label: 'Sync Data' },
+    { icon: '📝', label: 'New Triage' },
+    { icon: '📊', label: 'Generate Report' },
 ]
 
-const QuickActionButton = ({ icon, label, onNavigate }) => {
+const QuickActionButton = ({ icon, label, onClick }) => {
     return (
         <NeumorphicButton
-            onClick={() => label === 'Manual Triage' && onNavigate && onNavigate('triage')}
+            onClick={onClick}
             style={{ flexDirection: 'column', gap: '8px', padding: '20px 10px', borderRadius: '20px', width: '100%' }}
         >
             <span style={{ fontSize: '28px' }}>{icon}</span>
@@ -27,6 +23,24 @@ const QuickActionButton = ({ icon, label, onNavigate }) => {
 }
 
 const HomePage = ({ onNavigate }) => {
+    const [showReportOptions, setShowReportOptions] = useState(false)
+    const [reportData, setReportData] = useState(null)
+
+    const generateMockReport = (duration) => {
+        let stats = {}
+        if (duration === '1 Day') {
+            stats = { screenings: 12, critical: 2, safe: 10, village: 'Khandala Rural', doctor: 'Dr. A. Sharma (CHW)' }
+        } else if (duration === '1 Week') {
+            stats = { screenings: 64, critical: 9, safe: 55, village: 'Khandala + 2 adjacent', doctor: 'Dr. A. Sharma (CHW)' }
+        } else if (duration === '1 Month') {
+            stats = { screenings: 215, critical: 28, safe: 187, village: 'District Block A', doctor: 'Dr. A. Sharma (CHW)' }
+        } else {
+            stats = { screenings: 1420, critical: 185, safe: 1235, village: 'District Base', doctor: 'Dr. A. Sharma (CHW)' }
+        }
+        setReportData({ duration, ...stats })
+        setShowReportOptions(false)
+    }
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
@@ -36,7 +50,7 @@ const HomePage = ({ onNavigate }) => {
                     <div>
                         <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500 }}>TODAY'S OVERVIEW</p>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginTop: '6px' }}>
-                            <span style={{ fontSize: '36px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>12</span>
+                            <span style={{ fontSize: '36px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>0</span>
                             <span style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 500 }}>Screenings</span>
                         </div>
                     </div>
@@ -47,13 +61,12 @@ const HomePage = ({ onNavigate }) => {
                                 alignItems: 'center',
                                 gap: '6px',
                                 background: 'var(--bg)',
-                                boxShadow: '4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light)',
+                                boxShadow: 'inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light)',
                                 borderRadius: '12px',
                                 padding: '8px 14px',
                             }}
                         >
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--red-alert)', boxShadow: '0 0 6px var(--red-alert)' }} />
-                            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--red-alert)' }}>3 Pending Syncs</span>
+                            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>0 Pending Syncs</span>
                         </div>
                         <div style={{ marginTop: '8px' }}>
                             <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Last sync: 2h ago</span>
@@ -61,12 +74,11 @@ const HomePage = ({ onNavigate }) => {
                     </div>
                 </div>
 
-                {/* Stats Row */}
                 <div style={{ display: 'flex', gap: '12px', marginTop: '18px' }}>
                     {[
-                        { label: 'Critical', value: '2', color: 'var(--red-alert)' },
-                        { label: 'Moderate', value: '5', color: '#ffc107' },
-                        { label: 'Clear', value: '5', color: 'var(--green-alert)' },
+                        { label: 'Critical', value: '0', color: 'var(--red-alert)' },
+                        { label: 'Moderate', value: '0', color: '#ffc107' },
+                        { label: 'Clear', value: '0', color: 'var(--green-alert)' },
                     ].map((stat) => (
                         <div
                             key={stat.label}
@@ -91,9 +103,17 @@ const HomePage = ({ onNavigate }) => {
                 <p style={{ margin: '0 0 12px 4px', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                     Quick Actions
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
                     {QUICK_ACTIONS.map((action) => (
-                        <QuickActionButton key={action.label} {...action} onNavigate={onNavigate} />
+                        <QuickActionButton 
+                            key={action.label} 
+                            {...action} 
+                            onClick={() => {
+                                if (action.label === 'New Triage') onNavigate && onNavigate('triage');
+                                if (action.label === 'Generate Report') setShowReportOptions(true);
+                                if (action.label === 'Sync Data') alert('Syncing Data...');
+                            }} 
+                        />
                     ))}
                 </div>
             </div>
@@ -156,6 +176,83 @@ const HomePage = ({ onNavigate }) => {
                 </div>
             </div>
 
+            {/* Modals for Report functionality */}
+            {showReportOptions && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(218, 224, 230, 0.8)', padding: '20px' }}>
+                    <NeumorphicCard style={{ width: '100%', maxWidth: '300px' }}>
+                        <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--text-primary)', textAlign: 'center' }}>Generate Report</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {['1 Day', '1 Week', '1 Month', '1 Year'].map(dur => (
+                                <button
+                                    key={dur}
+                                    onClick={() => generateMockReport(dur)}
+                                    style={{
+                                        padding: '12px',
+                                        borderRadius: '12px',
+                                        border: 'none',
+                                        background: 'var(--bg)',
+                                        boxShadow: '4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light)',
+                                        color: 'var(--text-primary)',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    {dur} Report
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => setShowReportOptions(false)}
+                                style={{ marginTop: '8px', padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--bg)', boxShadow: 'inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light)', color: 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </NeumorphicCard>
+                </div>
+            )}
+
+            {reportData && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(218, 224, 230, 0.9)', padding: '20px' }}>
+                    <NeumorphicCard style={{ width: '100%', maxWidth: '340px' }}>
+                        <div style={{ borderBottom: '2px solid var(--shadow-dark)', paddingBottom: '12px', marginBottom: '16px', textAlign: 'center' }}>
+                            <h2 style={{ margin: '0 0 4px', fontSize: '20px', color: 'var(--text-primary)' }}>📊 {reportData.duration} Report</h2>
+                            <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)' }}>Generated for {reportData.village}</p>
+                        </div>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 600 }}>Doctor / CHW:</span>
+                                <span style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700 }}>{reportData.doctor}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 600 }}>Total Screenings:</span>
+                                <span style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700 }}>{reportData.screenings}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 600 }}>Safe (Green):</span>
+                                <span style={{ color: 'var(--green-alert)', fontSize: '13px', fontWeight: 700 }}>{reportData.safe}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 600 }}>Critical (Red):</span>
+                                <span style={{ color: 'var(--red-alert)', fontSize: '13px', fontWeight: 700 }}>{reportData.critical}</span>
+                            </div>
+                            <div style={{ marginTop: '8px', padding: '12px', background: 'var(--bg)', borderRadius: '12px', boxShadow: 'inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light)' }}>
+                                <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '11px', fontWeight: 600, marginBottom: '6px' }}>RECENT PATIENTS LOG (Preview)</span>
+                                <div style={{ fontSize: '12px', color: 'var(--text-primary)' }}>• Ramkumar S. - Clear</div>
+                                <div style={{ fontSize: '12px', color: 'var(--red-alert)' }}>• Bina Devi - Suspected TB</div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-primary)' }}>• Ashok M. - Clear</div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setReportData(null)}
+                            style={{ width: '100%', padding: '14px', borderRadius: '16px', border: 'none', background: 'var(--bg)', boxShadow: '4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light)', color: 'var(--green-alert)', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+                        >
+                            Close Report
+                        </button>
+                    </NeumorphicCard>
+                </div>
+            )}
         </div>
     )
 }

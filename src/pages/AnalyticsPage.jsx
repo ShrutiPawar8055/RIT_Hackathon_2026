@@ -2,13 +2,13 @@ import { useState } from 'react'
 import NeumorphicCard from '../components/ui/NeumorphicCard'
 
 const CHART_DATA = [
-    { label: 'Mon', tb: 3, pneu: 1 },
-    { label: 'Tue', tb: 5, pneu: 2 },
-    { label: 'Wed', tb: 2, pneu: 4 },
-    { label: 'Thu', tb: 6, pneu: 3 },
-    { label: 'Fri', tb: 4, pneu: 5 },
-    { label: 'Sat', tb: 7, pneu: 2 },
-    { label: 'Sun', tb: 3, pneu: 6 },
+    { label: 'Mon', tb: 0, pneu: 0 },
+    { label: 'Tue', tb: 0, pneu: 0 },
+    { label: 'Wed', tb: 0, pneu: 0 },
+    { label: 'Thu', tb: 0, pneu: 0 },
+    { label: 'Fri', tb: 0, pneu: 0 },
+    { label: 'Sat', tb: 0, pneu: 0 },
+    { label: 'Sun', tb: 0, pneu: 0 },
 ]
 
 const MAX_VAL = 8
@@ -70,9 +70,9 @@ const AnalyticsPage = () => {
             {/* Summary Chips */}
             <div style={{ display: 'flex', gap: '12px' }}>
                 {[
-                    { label: 'Total Screens', value: '47', icon: '🔬' },
-                    { label: 'TB Alerts', value: '18', icon: '🫁', color: 'var(--red-alert)' },
-                    { label: 'Pneumonia', value: '14', icon: '💊', color: '#ffc107' },
+                    { label: 'Total Screens', value: '0', icon: '🔬' },
+                    { label: 'TB Alerts', value: '0', icon: '🫁', color: 'var(--red-alert)' },
+                    { label: 'Pneumonia', value: '0', icon: '💊', color: '#ffc107' },
                 ].map((stat) => (
                     <NeumorphicCard key={stat.label} style={{ flex: 1, padding: '12px', textAlign: 'center' }}>
                         <div style={{ fontSize: '22px' }}>{stat.icon}</div>
@@ -160,9 +160,9 @@ const AnalyticsPage = () => {
                 <p style={{ margin: '0 0 14px', fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>📈 Weekly Trend Insights</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {[
-                        { label: 'TB Positivity Rate', value: '38%', trend: '↑ +4%', bad: true },
-                        { label: 'Pneumonia Rate', value: '30%', trend: '↓ -2%', bad: false },
-                        { label: 'Avg Confidence', value: '87%', trend: '↑ +1%', bad: false },
+                        { label: 'TB Positivity Rate', value: '0%', trend: '-', bad: false },
+                        { label: 'Pneumonia Rate', value: '0%', trend: '-', bad: false },
+                        { label: 'Avg Confidence', value: '-', trend: '-', bad: false },
                     ].map((row) => (
                         <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{row.label}</span>
