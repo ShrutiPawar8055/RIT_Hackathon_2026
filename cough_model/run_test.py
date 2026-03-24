@@ -3,7 +3,7 @@ import glob
 from cough import classify_cough
 
 # 1. This looks for ANY audio file in your folder automatically
-# It checks for .wav, .webm, and .mp3
+# It checks for .wav, .webm, and .mp3(diff types of file)
 audio_files = glob.glob("*.wav") + glob.glob("*.webm") + glob.glob("*.mp3")
 
 print("--- COUGH MODEL TESTER ---")
