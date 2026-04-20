@@ -1,5 +1,5 @@
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,40 +7,58 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Environment files
+.env
+.env.*
+!.env.example
 *.local
 
-# Editor directories and files
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.vite/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+ENV/
+pip-wheel-metadata/
+
+# ML model / dataset artifacts
+*.h5
+*.pkl
+*.joblib
+*.onnx
+**/cough_model/Sick/**
+**/cough_model/Healthy/**
+**/cough_model/spectrograms/**
+**/cough_model/test_data/**
+**/cough_model/**/*.webm
+**/cough_model/**/*.wav
+**/cough_model/**/*.ogg
+
+# Database files
+*.db
+*.sqlite3
+
+# Editor / OS files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-
-# ML training data and models
-cough_model/spectrograms/LIVEKIT_API_KEY=your-actual-key
-LIVEKIT_API_SECRET=your-actual-secret  
-LIVEKIT_URL=wss://your-livekit-server.com
-cough_model/Healthy/
-cough_model/Sick/
-cough_model/test_data/
-cough_model/**/*.webm
-cough_model/**/*.wav
-cough_model/**/*.ogg
-cough_model/**/*.png
-cough_model/**/*.h5
-cough_model/**/*.pyc
-**/__pycache__/
-*.pyc
-cough_model/model_performance.png
-cough_model/test_results.txt
-# Recursive ignores for nested data
-**/cough_model/Sick/**
-**/cough_model/Healthy/**
-**/cough_model/spectrograms/**
